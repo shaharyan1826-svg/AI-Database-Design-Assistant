@@ -1,0 +1,1 @@
+A Student has name, email and age. A Course has title and description. A Student enrolls in many Courses through Enrollment. An Enrollment has enrollment_date and status.
