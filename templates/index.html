@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Database Design Assistant</title>
+<style>
+:root{--blue:#2447b8;--ink:#182033;--muted:#647089;--bg:#f4f6fb}*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#182b70,#315ad1);color:white;padding:28px 18px}
+header .wrap,main{max-width:1000px;margin:auto}h1{margin:0 0 8px;font-size:28px}header p{margin:0;opacity:.9}
+main{padding:24px 16px 48px}.card{background:white;border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 4px 18px #1c2c5510}
+label{display:block;font-weight:700;margin-bottom:10px}textarea{width:100%;min-height:150px;padding:14px;border:1px solid #cbd3e4;border-radius:9px;font:15px/1.5 Arial}
+button{margin-top:12px;background:var(--blue);color:white;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer}
+h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:16px 0 8px}pre{background:#111827;color:#e5efff;padding:16px;border-radius:9px;overflow:auto;white-space:pre-wrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#e9efff;color:#243e91;padding:7px 10px;border-radius:20px;font-size:13px}
+li{margin:6px 0}.hint{color:var(--muted);font-size:13px}.review{padding:12px;border:1px solid #dce3f2;border-radius:8px;margin:8px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style></head><body>
+<header><div class="wrap"><h1>AI Database Design Assistant</h1><p>Turn written requirements into a starter relational database schema.</p></div></header>
+<main><section class="card"><form method="post"><label for="requirements">Describe your database requirements</label>
+<textarea id="requirements" name="requirements" required placeholder="Example: A Student has name, email and age. A Course has title and description. A Student enrolls in many Courses through Enrollment.">{{ requirements }}</textarea>
+<button type="submit">Generate Database Schema</button><p class="hint">Tip: Name entities and describe their attributes and relationships in complete sentences.</p></form></section>
+{% if result %}<section class="card">
+<h2>1. Extracted Entities</h2><div class="chips">{% for entity in result.entities %}<span class="chip">{{ entity }}</span>{% endfor %}</div>
+<h2 style="margin-top:22px">2. Attributes</h2>{% for entity, attrs in result.attributes.items() %}<h3>{{ entity }}</h3><p>{{ attrs|join(", ") if attrs else "No attributes confidently extracted; add them to the requirement." }}</p>{% endfor %}
+<h2 style="margin-top:22px">3. Relationships</h2>{% if result.relationships %}<ul>{% for rel in result.relationships %}<li>{{ rel.from }} → {{ rel.to }} ({{ rel.type }})</li>{% endfor %}</ul>{% else %}<p>No relationship could be confidently inferred. Describe which entity owns or references another.</p>{% endif %}
+<h2 style="margin-top:22px">4. Generated SQL</h2><pre id="sql">{{ result.sql }}</pre>
+<form method="post" action="/download-sql"><input type="hidden" name="requirements" value="{{ requirements|e }}"><button type="submit">Download SQL file</button></form>
+<h2 style="margin-top:22px">5. Normalization Review</h2>{% for item in result.normalization %}<div class="review"><strong>{{ item.level }} — {{ item.status }}</strong><br>{{ item.detail }}</div>{% endfor %}
+<ul>{% for warning in result.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+<h2 style="margin-top:22px">6. ER Diagram (Mermaid)</h2><p class="hint">Copy this diagram code into a Mermaid-compatible Markdown viewer to render the diagram.</p><pre>{{ result.mermaid }}</pre>
+</section>{% endif %}</main><footer>AI Database Design Assistant · Internship Project</footer></body></html>
